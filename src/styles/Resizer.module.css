@@ -1,0 +1,20 @@
+.resizer {
+    width: 8px;
+    background-color: transparent;
+    cursor: col-resize;
+    position: relative;
+    flex-shrink: 0;
+    will-change: transform;
+  }
+  
+  .resizer::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: 2rem;
+    width: 4px;
+    background-color: #9ca3af;
+    border-radius: 2px;
+  }
