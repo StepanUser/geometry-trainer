@@ -10,5 +10,9 @@ export class Point3D {
             this.y = y;
             this.z = z;
         }
-    }
+
+        add(point: Point3D) {
+            return new Point3D(this.x + point.x, this.y + point.y, this.z + point.z);
+        }
+}
     
