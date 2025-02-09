@@ -35,15 +35,11 @@ const GeometryTrainer3D: React.FC = () => {
 
   const generateInitialCode = () => {
     return `// Create a point
-      const point = { type: "point", x: 1, y: 1, z: 1 };
+      const point: Point3D = Point.byCoordinates(1,1,1);
       visualizer.show(point);
 
       // Create a line
-      const line = {
-      type: "line",
-      start: { type: "point", x: 0, y: 0, z: 0 },
-      end: { type: "point", x: 2, y: 2, z: 2 }
-      };
+      const line = Line.byStartEnd(Point.byCoordinates(0,0,0), Point.byCoordinates(5,5,1));
       visualizer.show(line);`;
   };
 
@@ -76,7 +72,6 @@ const GeometryTrainer3D: React.FC = () => {
       );
     
       previousCodeRef.current = code;
-      console.log(previousCodeRef.current);
 
     } catch (error) {
       console.log("Code execution error:", error);

@@ -127,22 +127,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
         debounceTimeoutRef.current = setTimeout(() => {
           try{
-            const code = monacoRef.current?.getValue();
-            if(code){
-              ts.transpileModule(code, {
-                compilerOptions: {
-                  target: ts.ScriptTarget.ES5,
-                  module: ts.ModuleKind.CommonJS,
-                }
-              });
+            const code = editor.getValue();
 
-              localStorage.setItem("geometry-trainer-code", code);
-              handleRunCode();
-            }
+            localStorage.setItem("geometry-trainer-code", code);
+
+            handleRunCode();
           } catch (error){
-            console.log("Error in real-time preview", error);
+            console.error("Error in real-time preview", error);
           }
-        }, 300)
+        }, 500)
       };
 
 
@@ -196,7 +189,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         const result = ts.transpileModule(fullCode, {
           compilerOptions: {
             target: ts.ScriptTarget.ES5,
-            module: ts.ModuleKind.CommonJS,
+            module: ts.ModuleKind.None,
           },
         });
 
