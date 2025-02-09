@@ -1,10 +1,11 @@
-import React, { useCallback, useRef, useState } from 'react';
-import * as THREE from 'three';
-import { CodeEditor } from './CodeEditor';
-import { Viewport3D } from './Viewport';
-import styles from '../styles/geometryTrainer.module.css';
-import { Resizer } from './Resizer';
-import * as AllTypes from '../types';
+import React, { useCallback, useRef, useState } from "react";
+import * as THREE from "three";
+import { CodeEditor } from "./CodeEditor";
+import { Viewport3D } from "./Viewport";
+import styles from "../styles/geometryTrainer.module.css";
+import { Resizer } from "./Resizer";
+import * as AllTypes from "../types";
+import { Visualizer } from "../types/visualizer";
 
 interface GeometryObject {
   new (...args: any[]): {
@@ -12,85 +13,112 @@ interface GeometryObject {
   };
 }
 
-
 interface GeometryTypes {
   [key: string]: GeometryObject;
 }
 
 const GeometryTrainer3D: React.FC = () => {
   const sceneRef = useRef<THREE.Scene | null>(null);
+  const VisualizerRef = useRef<Visualizer | null>(null);
   const [leftPanelWidth, setLeftPanelWidth] = useState(50);
-  
-  const geometryTypes: GeometryTypes = Object.entries(AllTypes).reduce((acc, [name, type]) => {
-    if (typeof type === 'function') {
-      acc[name] = type as unknown as GeometryObject;
-    }
-    return acc;
-  }, {} as GeometryTypes);
+  const previousCodeRef = useRef<string>();
+
+  const geometryTypes: GeometryTypes = Object.entries(AllTypes).reduce(
+    (acc, [name, type]) => {
+      if (typeof type === "function") {
+        acc[name] = type as unknown as GeometryObject;
+      }
+      return acc;
+    },
+    {} as GeometryTypes
+  );
 
   const generateInitialCode = () => {
-    let code = '';
-    let visualizationCode = '';
-    
-    Object.entries(geometryTypes).forEach(([typeName], index) => {
-      const x = (Math.random() * 4 - 2).toFixed(1);
-      const y = (Math.random() * 4 - 2).toFixed(1);
-      const z = (Math.random() * 4 - 2).toFixed(1);
-      
-      code += `const ${typeName.toLowerCase()}${index}: ${typeName} = new ${typeName}(${x}, ${y}, ${z});\n`;
-      visualizationCode += `${typeName.toLowerCase()}${index}.visualize(scene);\n`;
-    });
+    return `// Create a point
+      const point = { type: "point", x: 1, y: 1, z: 1 };
+      visualizer.show(point);
 
-    return `${code}\n${visualizationCode}`;
+      // Create a line
+      const line = {
+      type: "line",
+      start: { type: "point", x: 0, y: 0, z: 0 },
+      end: { type: "point", x: 2, y: 2, z: 2 }
+      };
+      visualizer.show(line);`;
   };
 
   const initialCode = generateInitialCode();
 
   const handleSceneReady = useCallback((scene: THREE.Scene) => {
     sceneRef.current = scene;
+    VisualizerRef.current = new Visualizer(scene);
   }, []);
 
   const handleRunCode = useCallback((code: string) => {
-    if (!sceneRef.current) return;
+    if (!sceneRef.current || !VisualizerRef.current) return;
 
     const scene = sceneRef.current;
-    
+
     while (scene.children.length > 2) {
-      scene.remove(scene.children[2]);
+       scene.remove(scene.children[2]);
     }
-    
+
     try {
-      const evalContext = { 
-        ...geometryTypes, 
-        scene, 
-        THREE 
+      const evalContext = {
+        ...geometryTypes,
+        scene,
+        THREE,
+        visualizer: VisualizerRef.current
       };
-      new Function(...Object.keys(evalContext), code)(...Object.values(evalContext));
+
+      new Function(...Object.keys(evalContext), code)(
+        ...Object.values(evalContext)
+      );
+    
+      previousCodeRef.current = code;
+      console.log(previousCodeRef.current);
+
     } catch (error) {
-      console.error('Code execution error:', error);
+      console.log("Code execution error:", error);
+      
+      if(previousCodeRef.current){
+
+        while (scene.children.length > 2) {
+          scene.remove(scene.children[2]);
+       }
+
+        const evalContext = {
+          
+          ...geometryTypes,
+          scene,
+          THREE,
+          visualizer: VisualizerRef.current
+        };
+
+          new Function(...Object.keys(evalContext), previousCodeRef.current)(
+            ...Object.values(evalContext)
+          )
+      }
     }
   }, []);
 
   const handleResize = useCallback((movementX: number) => {
-    setLeftPanelWidth(prev => {
-      const containerWidth = document.querySelector(`.${styles.container}`)?.clientWidth || 0;
+    setLeftPanelWidth((prev) => {
+      const containerWidth =
+        document.querySelector(`.${styles.container}`)?.clientWidth || 0;
       const deltaPercentage = (movementX / containerWidth) * 100;
       const newWidth = Math.min(Math.max(20, prev + deltaPercentage), 80);
       return newWidth;
     });
   }, []);
 
-
   return (
     <div className={styles.container}>
-      <div 
-        className={styles.panel}
-        style={{ width: `${leftPanelWidth}%` }}
-      >
+      <div className={styles.panel} style={{ width: `${leftPanelWidth}%` }}>
         <CodeEditor initialCode={initialCode} onRunCode={handleRunCode} />
       </div>
       <Resizer onResize={handleResize} />
-      <div 
+      <div
         className={styles.panel}
         style={{ width: `${100 - leftPanelWidth}%` }}
       >

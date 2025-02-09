@@ -18,6 +18,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const monacoRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [jsonObjects, setJsonObjects] = useState<string[]>([]);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     const savedJson = localStorage.getItem("geometry-trainer-json-data");
@@ -117,6 +118,34 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       monacoRef.current = editor;
 
+
+
+      const handleEditorChange = () => {
+        if(debounceTimeoutRef.current){
+          clearTimeout(debounceTimeoutRef.current);
+        }
+
+        debounceTimeoutRef.current = setTimeout(() => {
+          try{
+            const code = monacoRef.current?.getValue();
+            if(code){
+              ts.transpileModule(code, {
+                compilerOptions: {
+                  target: ts.ScriptTarget.ES5,
+                  module: ts.ModuleKind.CommonJS,
+                }
+              });
+
+              localStorage.setItem("geometry-trainer-code", code);
+              handleRunCode();
+            }
+          } catch (error){
+            console.log("Error in real-time preview", error);
+          }
+        }, 300)
+      };
+
+
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
         const formatAction = editor.getAction("editor.action.formatDocument");
         if (formatAction) {
@@ -130,21 +159,20 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       window.addEventListener("resize", resizeEditor);
 
-      const saveCode = () => {
-        const code = editor.getValue();
-        localStorage.setItem("geometry-trainer-code", code);
-      };
-
-      const subscription = editor.onDidChangeModelContent(saveCode);
+      const subscription = editor.onDidChangeModelContent(handleEditorChange);
 
       return () => {
+        if(debounceTimeoutRef.current){
+          clearTimeout(debounceTimeoutRef.current);
+        }
+
         window.removeEventListener("resize", resizeEditor);
         subscription.dispose();
         model.dispose();
         editor.dispose();
       };
     });
-  }, [initialCode]);
+  }, [initialCode, onRunCode]);
 
   const handleRunCode = () => {
     if (monacoRef.current) {
@@ -164,16 +192,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       `;
 
       const fullCode = jsonDataWrapper + "\n" + code;
+      try {
+        const result = ts.transpileModule(fullCode, {
+          compilerOptions: {
+            target: ts.ScriptTarget.ES5,
+            module: ts.ModuleKind.CommonJS,
+          },
+        });
 
-      const result = ts.transpileModule(fullCode, {
-        compilerOptions: {
-          target: ts.ScriptTarget.ES5,
-          module: ts.ModuleKind.CommonJS,
-        },
-      });
-
-      console.log(result.outputText);
-      onRunCode(result.outputText);
+        onRunCode(result.outputText);
+      } catch (error) {
+        console.error("Transpilation error", error);
+      }
     }
   };
 
