@@ -21,7 +21,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const debounceTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    const savedJson = localStorage.getItem("geometry-trainer-json-data");
+    const savedJson = localStorage.getItem("geometry");
     const savedCode = localStorage.getItem("geometry-trainer-code");
     const codeToUse = savedCode || initialCode;
 
@@ -52,9 +52,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       configureEditorOptions();
 
       const setupTypes = (monaco: typeof import("monaco-editor")) => {
-        const jsonArrayType = jsonObjects
-          .map((_, index) => `json${index}: any;`)
-          .join("\n");
 
         const objectDefinitions = Object.entries(AllTypes)
           .map(([name, type]) => {
@@ -72,24 +69,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             private visualizePoint(point: Point3D, color?: number, size?: number): void;
             private visualizeLine(line: Line3D, color?: number): void;
           }
+          
+          declare class GeometryStorage {
+          static getAll(): any[];
+          static getAllPoints(): Point3D[];
+          }
 
           ${objectDefinitions}
           declare const scene: any;
           declare const THREE: any;
           declare let visualizer: Visualizer;
-          declare const jsonData: {
-            ${jsonArrayType}
-            getAll: () => any[];
-          };
-      
 
-
-
-          declare namespace React {
-            interface FC<P = {}> {
-              (props: P): React.ReactElement | null;
-            }
-          }
         `;
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(
@@ -172,15 +162,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       const code = monacoRef.current.getValue();
 
       const jsonDataWrapper = `
-        const jsonData = {
-          ${jsonObjects
-            .map((json, index) => `json${index}: ${json}`)
-            .join(",\n")},
-          getAll: function() { return [${jsonObjects
-            .map((_, index) => `this.json${index}`)
-            .join(", ")}]; }
-        };
-
         const visualizer = new Visualizer(scene);
       `;
 
@@ -209,7 +190,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       const newJsonObjects = [...jsonObjects, parsedJson];
       setJsonObjects(newJsonObjects);
       localStorage.setItem(
-        "geometry-trainer-json-data",
+        "geometry",
         JSON.stringify(newJsonObjects)
       );
     } catch (e) {
@@ -221,7 +202,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const handleClearJson = () => {
     if (confirm("Are you sure you want to clear all JSON data?")) {
       setJsonObjects([]);
-      localStorage.removeItem("geometry-trainer-json-data");
+      localStorage.removeItem("geometry");
     }
   };
 

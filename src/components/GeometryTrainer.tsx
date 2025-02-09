@@ -34,14 +34,19 @@ const GeometryTrainer3D: React.FC = () => {
   );
 
   const generateInitialCode = () => {
-    return `// Create a point
-      const point: Point3D = Point.byCoordinates(1,1,1);
-      visualizer.show(point);
+    return `
+// Create a point
+const point: Point3D = Point.byCoordinates(1, 1, 1);
 
-      // Create a line
-      const line = Line.byStartEnd(Point.byCoordinates(0,0,0), Point.byCoordinates(5,5,1));
-      visualizer.show(line);`;
-  };
+// Create a line
+const line = Line.byStartEnd(
+  Point.byCoordinates(0, 0, 0), 
+  Point.byCoordinates(5, 5, 1));
+
+// Visualize objects
+visualizer.show(point);
+visualizer.show(line);`;
+};
 
   const initialCode = generateInitialCode();
 
