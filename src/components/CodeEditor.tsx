@@ -125,7 +125,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           } catch (error){
             console.error("Error in real-time preview", error);
           }
-        }, 500)
+        }, 1000)
       };
 
 
