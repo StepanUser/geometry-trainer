@@ -2,14 +2,14 @@ import * as THREE from "three";
 import { Point3D } from "./point3d";
 import { Line3D } from "./line3d";
 
-export class World {
+export class Visualizer {
   private scene: THREE.Scene;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
   }
 
-  show(object: any): void {
+   show(object: any): void {
     switch (object.type) {
       case "point":
         this.visualizePoint(object as Point3D);
