@@ -4,4 +4,4 @@ export * from './line3d';
 export * from './visualizer';
 export * from './point';
 export * from './line';
-export * from './geometryStorage';
+export * from './geometrystorage';
