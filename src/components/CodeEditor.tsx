@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Braces, Eye, Play, Trash2 } from "lucide-react";
 import * as monaco from "monaco-editor";
 import loader from "@monaco-editor/loader";
-import styles from "../styles/CodeEditor.module.css";
+import styles from "../styles/codeeditor.module.css";
 import * as ts from "typescript";
 import * as AllTypes from "../types";
 

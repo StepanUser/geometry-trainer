@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { RotateCcw } from "lucide-react";
 import * as THREE from "three";
-import styles from "../styles/Viewport3D.module.css";
+import styles from "../styles/viewport3d.module.css";
 
 interface Viewport3DProps {
   onSceneReady: (scene: THREE.Scene) => void;

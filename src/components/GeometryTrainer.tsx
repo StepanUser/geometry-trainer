@@ -1,11 +1,12 @@
 import React, { useCallback, useRef, useState } from "react";
-import * as THREE from "three";
-import { CodeEditor } from "./CodeEditor";
-import { Viewport3D } from "./Viewport";
+import * as THREE from "three"; 
 import styles from "../styles/geometryTrainer.module.css";
-import { Resizer } from "./Resizer";
 import * as AllTypes from "../types";
 import { Visualizer } from "../types/visualizer";
+import { Viewport3D } from "./viewport";
+import { CodeEditor } from "./codeeditor";
+import { Resizer } from "./resizer";
+
 
 interface GeometryObject {
   new (...args: any[]): {

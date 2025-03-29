@@ -1,5 +1,5 @@
 import React from 'react'
-import GeometryTrainer3D from './components/GeometryTrainer'
+import GeometryTrainer3D from './components/geometrytrainer'
 
 const App: React.FC = () => {
   return (
