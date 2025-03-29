@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import * as THREE from "three"; 
-import styles from "../styles/geometryTrainer.module.css";
 import * as AllTypes from "../types";
+import styles from "../styles/geometrytrainer.module.css";
 import { Visualizer } from "../types/visualizer";
 import { Viewport3D } from "./viewport";
 import { CodeEditor } from "./codeeditor";
